@@ -1,16 +1,12 @@
-/* Estilo geral do corpo da página */
 body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* Estilos do Calendário (a serem gerados pelo JS) */
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 5px;
 }
-
 .header-dia {
     font-weight: bold;
     text-align: center;
@@ -19,7 +15,6 @@ body {
     color: white;
     border-radius: 5px;
 }
-
 .dia-celula {
     border: 1px solid #dee2e6;
     background-color: #fff;
@@ -29,39 +24,19 @@ body {
     display: flex;
     flex-direction: column;
 }
-
-.dia-celula.outro-mes {
-    background-color: #f1f1f1;
-    color: #aaa;
-}
-
-.dia-numero {
-    font-weight: bold;
-    font-size: 1.2em;
-}
-
-.lista-folgas {
-    list-style-type: none;
-    padding-left: 0;
-    margin-top: 10px;
-    font-size: 0.8em;
-}
-
-.lista-folgas li {
-    padding: 2px 5px;
-    margin-bottom: 3px;
-    border-radius: 3px;
-}
-
-/* Cores para as folgas */
+.dia-celula.outro-mes { background-color: #f1f1f1; color: #aaa; }
+.dia-numero { font-weight: bold; font-size: 1.2em; }
+.lista-folgas { list-style-type: none; padding-left: 0; margin-top: 10px; font-size: 0.8em; }
+.lista-folgas li { padding: 2px 5px; margin-bottom: 3px; border-radius: 3px; }
 .folga-sexta { background-color: #d1e7dd; border-left: 3px solid #198754; }
 .folga-sabado { background-color: #cff4fc; border-left: 3px solid #0dcaf0; }
 .folga-domingo { background-color: #fff3cd; border-left: 3px solid #ffc107; }
-
-/* Cores para os freelancers */
-.freelancer-item {
-    font-style: italic;
-    font-weight: bold;
-}
+.freelancer-item { font-style: italic; font-weight: bold; }
 .freelancer-trabalha { background-color: #e2e3e5; }
 .freelancer-folga { background-color: #f8d7da; }
+
+/* Novo estilo para o texto de ajuda dinâmico */
+.helper-text {
+    font-style: italic;
+    display: block; /* Garante que o texto ocupe sua própria linha */
+}
