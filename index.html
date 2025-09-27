@@ -8,35 +8,35 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container mt-4 mb-5">
         <header class="text-center mb-4">
             <h1>Gerador de Escalas de Fim de Semana</h1>
-            <p class="lead">Preencha os nomes, defina o mês e gere a escala.</p>
+            <p class="lead">Uma ferramenta inteligente para automatizar escalas rotativas.</p>
         </header>
 
         <div class="card shadow-sm mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">1. Funcionários (Baseado na última semana de Setembro de 2025)</h5>
-            </div>
+            <div class="card-header"><h5 class="mb-0">1. Funcionários</h5></div>
             <div class="card-body">
-                <p class="card-text">Preencha os nomes dos funcionários de acordo com o grupo de folga da escala base.</p>
+                <p class="card-text">Preencha os nomes dos funcionários de cada grupo. A ordem das folgas é salva e carregada automaticamente.</p>
                 <div class="row">
                     <div class="col-md-4 mb-3 mb-md-0">
-                        <h6>Grupo que folgou na Sexta (26/09)</h6>
-                        <input type="text" class="form-control mb-2" id="grupoA-func1" placeholder="Funcionario 1" value="Maicon">
+                        <h6>Grupo A</h6>
+                        <small class="form-text text-muted helper-text" id="helper-grupoA"></small>
+                        <input type="text" class="form-control mb-2 mt-2" id="grupoA-func1" placeholder="Funcionario 1" value="Maicon">
                         <input type="text" class="form-control mb-2" id="grupoA-func2" placeholder="Funcionario 2" value="Iranilda">
                         <input type="text" class="form-control mb-2" id="grupoA-func3" placeholder="Funcionario 3" value="Valeria">
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
-                        <h6>Grupo que folgou no Sábado (27/09)</h6>
-                        <input type="text" class="form-control mb-2" id="grupoB-func1" placeholder="Funcionario 1" value="Elida">
+                        <h6>Grupo B</h6>
+                        <small class="form-text text-muted helper-text" id="helper-grupoB"></small>
+                        <input type="text" class="form-control mb-2 mt-2" id="grupoB-func1" placeholder="Funcionario 1" value="Elida">
                         <input type="text" class="form-control mb-2" id="grupoB-func2" placeholder="Funcionario 2" value="Ingred">
                         <input type="text" class="form-control mb-2" id="grupoB-func3" placeholder="Funcionario 3" value="Daiane">
                     </div>
                     <div class="col-md-4">
-                        <h6>Grupo que folgou no Domingo (28/09)</h6>
-                        <input type="text" class="form-control mb-2" id="grupoC-func1" placeholder="Funcionario 1" value="Stefany">
+                        <h6>Grupo C</h6>
+                        <small class="form-text text-muted helper-text" id="helper-grupoC"></small>
+                        <input type="text" class="form-control mb-2 mt-2" id="grupoC-func1" placeholder="Funcionario 1" value="Stefany">
                         <input type="text" class="form-control mb-2" id="grupoC-func2" placeholder="Funcionario 2" value="Ana Flavia">
                         <input type="text" class="form-control mb-2" id="grupoC-func3" placeholder="Funcionario 3" value="Luciana">
                         <input type="text" class="form-control mb-2" id="grupoC-func4" placeholder="Funcionario 4" value="Isadora">
@@ -46,39 +46,35 @@
         </div>
 
         <div class="card shadow-sm mb-4">
-             <div class="card-header">
-                <h5 class="mb-0">2. Gerar Escala</h5>
-            </div>
+             <div class="card-header"><h5 class="mb-0">2. Gerar Escala</h5></div>
             <div class="card-body">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label for="mes" class="form-label">Mês</label>
-                        <input type="number" class="form-control" id="mes" value="10" min="1" max="12">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="ano" class="form-label">Ano</label>
-                        <input type="number" class="form-control" id="ano" value="2025">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="freelancer1" class="form-label">Freelancer 1 (Opcional)</label>
-                        <input type="text" class="form-control" id="freelancer1" placeholder="Nome">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="freelancer2" class="form-label">Freelancer 2 (Opcional)</label>
-                        <input type="text" class="form-control" id="freelancer2" placeholder="Nome">
-                    </div>
+                    <div class="col-md-3"><label for="mes" class="form-label">Mês</label><input type="number" class="form-control" id="mes" value="10" min="1" max="12"></div>
+                    <div class="col-md-3"><label for="ano" class="form-label">Ano</label><input type="number" class="form-control" id="ano" value="2025"></div>
+                    <div class="col-md-3"><label for="freelancer1" class="form-label">Freelancer 1 (Opc.)</label><input type="text" class="form-control" id="freelancer1" placeholder="Nome"></div>
+                    <div class="col-md-3"><label for="freelancer2" class="form-label">Freelancer 2 (Opc.)</label><input type="text" class="form-control" id="freelancer2" placeholder="Nome"></div>
                 </div>
                  <div class="d-flex justify-content-end mt-3 gap-2">
-                    <button class="btn btn-secondary" id="reset-btn">Resetar Estado</button>
+                    <button class="btn btn-danger" id="reset-btn">Resetar Ordem</button>
                     <button class="btn btn-primary" id="gerar-escala-btn">Gerar Escala</button>
                 </div>
             </div>
         </div>
-
-        <hr>
-
+        
         <div id="calendario-container"></div>
-
+        
+        <div class="card shadow-sm mt-5">
+            <div class="card-header"><h5 class="mb-0">Como Usar</h5></div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><b>1. Verifique os Nomes:</b> Apenas na primeira vez (ou após um "Reset"), confira se os nomes nos grupos A, B e C estão corretos.</li>
+                    <li class="list-group-item"><b>2. Geração Contínua:</b> Escolha o mês/ano e clique em "Gerar Escala". O sistema usará a ordem de folgas do mês anterior para calcular a nova escala.</li>
+                    <li class="list-group-item"><b>3. Memória Automática:</b> O sistema salva a última ordem de folgas no seu navegador. Ao fechar e abrir a página, ele continuará de onde parou.</li>
+                    <li class="list-group-item"><b>4. Textos de Ajuda:</b> Abaixo do nome de cada grupo, um texto informa em qual dia da semana aquele grupo folgou por último, para sua referência.</li>
+                    <li class="list-group-item"><b>5. Resetar Ordem:</b> Se precisar recomeçar a contagem da estaca zero (Setembro de 2025), clique em "Resetar Ordem". Isso não apaga os nomes que você digitou, apenas a ordem das folgas.</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
