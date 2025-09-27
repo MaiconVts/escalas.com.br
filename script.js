@@ -1,24 +1,18 @@
 // Espera o conteúdo da página carregar completamente para rodar o script
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- ESTADO INICIAL BASE ---
-    // Este objeto NUNCA muda. É a nossa referência original para o Reset.
+    // --- ESTADO INICIAL BASE (Apenas a ordem dos grupos) ---
+    // Esta é a referência original para o Reset.
     const ESTADO_BASE_SETEMBRO = {
-        // A ordem aqui é crucial: [Grupo da Sexta, Grupo do Sábado, Grupo do Domingo]
-        gruposEmOrdemDeFolga: [
-            ['Maicon', 'Iranilda', 'Valeria'], // Grupo A
-            ['Elida', 'Ingred', 'Daiane'],      // Grupo B
-            ['Stefany', 'Ana Flavia', 'Luciana', 'Isadora'] // Grupo C
-        ]
+        // A ordem representa a folga da última semana de Setembro: [Sexta, Sábado, Domingo]
+        ordemDosGrupos: ['grupoA', 'grupoB', 'grupoC']
     };
 
     // --- ESTADO ATUAL (MUTÁVEL) ---
-    // Esta variável vai guardar o estado final do último mês gerado.
-    // Começa como uma cópia do estado base.
+    // Guarda a ORDEM de folga do último mês gerado.
     let estadoAtual = JSON.parse(JSON.stringify(ESTADO_BASE_SETEMBRO));
 
     // --- ELEMENTOS DO DOM (Interface) ---
-    // Mapeamento de todos os inputs e botões
     const mesInput = document.getElementById('mes');
     const anoInput = document.getElementById('ano');
     const freelancer1Input = document.getElementById('freelancer1');
@@ -32,78 +26,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- EVENTOS PRINCIPAIS ---
 
-    // Evento para o botão GERAR ESCALA
     gerarEscalaBtn.addEventListener('click', () => {
-        // 1. Pega os dados da interface (mês, ano, nomes)
         const mes = parseInt(mesInput.value);
         const ano = parseInt(anoInput.value);
         const freelancer1 = freelancer1Input.value.trim();
         const freelancer2 = freelancer2Input.value.trim();
-        const gruposDaUI = getGruposFromUI();
-
-        // Atualiza o estado base com os nomes da UI, caso tenham mudado
-        estadoAtual.gruposEmOrdemDeFolga = gruposDaUI;
-
-        // 2. Gera os dados da escala, passando o estado atual
-        const dadosEscala = gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoAtual);
         
-        // 3. ATUALIZA O ESTADO GLOBAL para o próximo mês
+        // 1. Pega os nomes dos funcionários que estão NA TELA no momento do clique.
+        const nomesDosGrupos = getGruposFromUI();
+
+        // 2. Gera os dados da escala, passando o ESTADO ATUAL (continuidade) e os NOMES (da tela).
+        const dadosEscala = gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoAtual, nomesDosGrupos);
+        
+        // 3. ATUALIZA O ESTADO GLOBAL com a nova ordem para o próximo mês.
         estadoAtual = dadosEscala.estadoFinal;
 
-        // 4. Renderiza o calendário na tela
+        // 4. Renderiza o calendário na tela.
         renderizarCalendario(dadosEscala);
     });
 
-    // Evento para o botão RESETAR
     resetBtn.addEventListener('click', () => {
-        if (confirm('Isso irá resetar o estado da escala para a configuração original de Setembro de 2025. Deseja continuar?')) {
+        if (confirm('Isso irá resetar a ordem das folgas para a configuração original de Setembro de 2025. Deseja continuar?')) {
+            // Reseta apenas a ORDEM, os nomes na tela não são alterados.
             estadoAtual = JSON.parse(JSON.stringify(ESTADO_BASE_SETEMBRO));
-            
-            // Reseta os campos de nome para os valores originais
-            inputsGrupoA.forEach((input, i) => input.value = ESTADO_BASE_SETEMBRO.gruposEmOrdemDeFolga[0][i] || '');
-            inputsGrupoB.forEach((input, i) => input.value = ESTADO_BASE_SETEMBRO.gruposEmOrdemDeFolga[1][i] || '');
-            inputsGrupoC.forEach((input, i) => input.value = ESTADO_BASE_SETEMBRO.gruposEmOrdemDeFolga[2][i] || '');
-            
-            calendarioContainer.innerHTML = '<div class="alert alert-info">Estado resetado. Preencha os dados e gere uma nova escala.</div>';
-            alert('Estado da escala resetado com sucesso!');
+            calendarioContainer.innerHTML = '<div class="alert alert-info">Ordem das folgas resetada. Gere uma nova escala.</div>';
+            alert('Ordem das folgas resetada com sucesso!');
         }
     });
 
     // --- FUNÇÕES DE LÓGICA ---
 
     /**
-     * Lê os nomes dos funcionários dos campos de input e os retorna estruturados.
+     * Lê os nomes dos funcionários dos inputs e retorna um objeto mapeando o ID do grupo aos nomes.
      */
     function getGruposFromUI() {
-        const grupoA = inputsGrupoA.map(input => input.value.trim()).filter(Boolean);
-        const grupoB = inputsGrupoB.map(input => input.value.trim()).filter(Boolean);
-        const grupoC = inputsGrupoC.map(input => input.value.trim()).filter(Boolean);
-        return [grupoA, grupoB, grupoC];
+        return {
+            grupoA: inputsGrupoA.map(input => input.value.trim()).filter(Boolean),
+            grupoB: inputsGrupoB.map(input => input.value.trim()).filter(Boolean),
+            grupoC: inputsGrupoC.map(input => input.value.trim()).filter(Boolean)
+        };
     }
     
     /**
-     * Orquestra a geração de todos os dados necessários para a escala do mês.
+     * Orquestra a geração dos dados do mês.
      */
-    function gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoInicialDoMes) {
-        const mesJS = mes - 1; // Mês no JS é 0-indexado
+    function gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoInicialDoMes, nomesDosGrupos) {
+        const mesJS = mes - 1;
         const diasNoMes = new Date(ano, mes, 0).getDate();
         const primeiroDiaSemana = new Date(ano, mesJS, 1).getDay();
 
         let dias = [];
         for (let i = 1; i <= diasNoMes; i++) {
             const data = new Date(ano, mesJS, i);
-            dias.push({
-                data: data,
-                dia: i,
-                diaSemana: data.getDay(),
-                folgas: [],
-                freelancers: []
-            });
+            dias.push({ data: data, dia: i, diaSemana: data.getDay(), folgas: [], freelancers: [] });
         }
         
-        // **LÓGICA CORRIGIDA**
-        // A função de rotação agora retorna o estado final para ser usado no próximo mês.
-        const estadoFinal = calcularRotacaoPrincipal(dias, estadoInicialDoMes);
+        const estadoFinal = calcularRotacaoPrincipal(dias, estadoInicialDoMes, nomesDosGrupos);
 
         if (freelancer1) calcularEscalaFreelancer(dias, freelancer1);
         if (freelancer2) calcularEscalaFreelancer(dias, freelancer2, true);
@@ -114,34 +92,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * LÓGICA DE ROTAÇÃO PRINCIPAL - **TOTALMENTE REESCRITA E CORRIGIDA**
+     * LÓGICA DE ROTAÇÃO PRINCIPAL - **VERSÃO FINAL E CORRIGIDA**
      */
-    function calcularRotacaoPrincipal(diasDoMes, estadoInicial) {
-        // Faz uma cópia dos grupos para poder manipular
-        let gruposDaSemana = JSON.parse(JSON.stringify(estadoInicial.gruposEmOrdemDeFolga));
+    function calcularRotacaoPrincipal(diasDoMes, estadoInicial, nomesDosGrupos) {
+        // 1. Faz uma cópia da ORDEM dos grupos do estado anterior.
+        let ordemDaSemana = [...estadoInicial.ordemDosGrupos];
 
-        // ROTAÇÃO INICIAL: O estado que recebemos é do mês anterior.
-        // A primeira coisa a fazer é rotacionar para a primeira semana do mês atual.
-        // O último grupo (Domingo) vai para o início (Sexta).
-        gruposDaSemana.unshift(gruposDaSemana.pop());
+        // 2. ROTAÇÃO INICIAL: Prepara a ordem para a PRIMEIRA semana do mês.
+        // O último grupo (que folgou no Domingo) passa a ser o primeiro (folgará na Sexta).
+        ordemDaSemana.unshift(ordemDaSemana.pop());
 
         diasDoMes.forEach(diaInfo => {
-            // Associa os grupos aos dias de folga da semana atual
-            if (diaInfo.diaSemana === 5) { // Sexta-feira
-                diaInfo.folgas.push({ tipo: 'sexta', grupo: gruposDaSemana[0] });
-            } else if (diaInfo.diaSemana === 6) { // Sábado
-                diaInfo.folgas.push({ tipo: 'sabado', grupo: gruposDaSemana[1] });
-            } else if (diaInfo.diaSemana === 0) { // Domingo
-                diaInfo.folgas.push({ tipo: 'domingo', grupo: gruposDaSemana[2] });
+            const idGrupoSexta = ordemDaSemana[0];
+            const idGrupoSabado = ordemDaSemana[1];
+            const idGrupoDomingo = ordemDaSemana[2];
 
-                // APÓS O DOMINGO, rotacionamos a ordem para a PRÓXIMA semana.
-                gruposDaSemana.unshift(gruposDaSemana.pop());
+            if (diaInfo.diaSemana === 5) { // Sexta-feira
+                diaInfo.folgas.push({ tipo: 'sexta', grupo: nomesDosGrupos[idGrupoSexta] });
+            } else if (diaInfo.diaSemana === 6) { // Sábado
+                diaInfo.folgas.push({ tipo: 'sabado', grupo: nomesDosGrupos[idGrupoSabado] });
+            } else if (diaInfo.diaSemana === 0) { // Domingo
+                diaInfo.folgas.push({ tipo: 'domingo', grupo: nomesDosGrupos[idGrupoDomingo] });
+
+                // 3. APÓS o Domingo, rotaciona a ORDEM para a PRÓXIMA semana.
+                ordemDaSemana.unshift(ordemDaSemana.pop());
             }
         });
 
-        // Retorna o estado final dos grupos após o último fim de semana,
-        // que será o estado inicial para o próximo mês.
-        return { gruposEmOrdemDeFolga: gruposDaSemana };
+        // 4. Retorna a ORDEM final, que será o estado inicial para o próximo mês.
+        return { ordemDosGrupos: ordemDaSemana };
     }
 
     /**
@@ -162,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- FUNÇÕES DE RENDERIZAÇÃO (VISUAL) ---
-    // (Sem alterações, apenas copiada para integridade)
     function renderizarCalendario(dados) {
         let html = `
             <div class="text-center">
