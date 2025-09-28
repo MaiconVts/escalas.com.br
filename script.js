@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const freelancer2Input = document.getElementById('freelancer2');
     const gerarEscalaBtn = document.getElementById('gerar-escala-btn');
     const resetBtn = document.getElementById('reset-btn');
-    const exportExcelBtn = document.getElementById('export-excel-btn'); // Novo botão
+    const exportExcelBtn = document.getElementById('export-excel-btn');
     const calendarioContainer = document.getElementById('calendario-container');
     const inputsGrupoA = [document.getElementById('grupoA-func1'), document.getElementById('grupoA-func2'), document.getElementById('grupoA-func3'), document.getElementById('grupoA-func4')];
     const inputsGrupoB = [document.getElementById('grupoB-func1'), document.getElementById('grupoB-func2'), document.getElementById('grupoB-func3'), document.getElementById('grupoB-func4')];
@@ -37,27 +37,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const dadosEscala = gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoAtual, nomesDosGrupos);
         
         estadoAtual = dadosEscala.estadoFinal;
-        dadosDaEscalaAtual = dadosEscala; // Salva os dados para a exportação
+        dadosDaEscalaAtual = dadosEscala;
         salvarEstado(estadoAtual);
         atualizarLabelsUI(estadoAtual);
         renderizarCalendario(dadosEscala);
         
-        exportExcelBtn.disabled = false; // Habilita o botão de exportar
+        exportExcelBtn.disabled = false;
     });
 
     resetBtn.addEventListener('click', () => {
         if (confirm('Isso irá resetar a ordem das folgas para a configuração original. Deseja continuar?')) {
             localStorage.removeItem('escala_estado');
             estadoAtual = JSON.parse(JSON.stringify(ESTADO_BASE_SETEMBRO));
-            dadosDaEscalaAtual = null; // Limpa os dados
+            dadosDaEscalaAtual = null;
             atualizarLabelsUI(estadoAtual);
             calendarioContainer.innerHTML = '<div class="alert alert-info">Ordem das folgas resetada. Gere uma nova escala.</div>';
-            exportExcelBtn.disabled = true; // Desabilita o botão de exportar
+            exportExcelBtn.disabled = true;
             alert('Ordem das folgas resetada com sucesso!');
         }
     });
 
-    // Evento do novo botão de exportar
     exportExcelBtn.addEventListener('click', () => {
         if (dadosDaEscalaAtual) {
             exportarParaExcel(dadosDaEscalaAtual);
@@ -109,8 +108,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const estadoFinal = calcularRotacaoPrincipal(dias, estadoInicialDoMes, nomesDosGrupos, todosFuncionarios);
 
-        if (freelancer1) calcularEscalaFreelancer(dias, freelancer1);
-        if (freelancer2) calcularEscalaFreelancer(dias, freelancer2, true);
+        // --- LÓGICA DOS FREELANCERS CORRIGIDA ---
+        if (freelancer1 || freelancer2) {
+            let trabalhaHoje = false; 
+            dias.forEach(diaInfo => {
+                const status = (diaInfo.diaSemana === 0) ? 'Folga' : (trabalhaHoje ? 'Trabalha' : 'Folga');
+                
+                if (freelancer1) diaInfo.freelancers.push({ nome: freelancer1, status });
+                if (freelancer2) diaInfo.freelancers.push({ nome: freelancer2, status });
+
+                trabalhaHoje = !trabalhaHoje;
+            });
+        }
+        // --- FIM DA LÓGICA ---
 
         const nomeMes = new Date(ano, mesJS, 1).toLocaleString('pt-BR', { month: 'long' });
 
@@ -138,63 +148,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return { ordemDosGrupos: ordemDaSemana };
     }
 
-    function calcularEscalaFreelancer(diasDoMes, nome, comecarTrabalhando = false) {
-        let trabalhaHoje = comecarTrabalhando; 
-        diasDoMes.forEach(diaInfo => {
-            let status = (diaInfo.diaSemana === 0) ? 'Folga' : (trabalhaHoje ? 'Trabalha' : 'Folga');
-            diaInfo.freelancers.push({ nome, status });
-            trabalhaHoje = !trabalhaHoje;
-        });
-    }
-
-    // --- NOVA FUNÇÃO DE EXPORTAÇÃO ---
     function exportarParaExcel(dados) {
         const diasDaSemanaNomes = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
         let linhasDaPlanilha = [];
-
-        // Cabeçalho da planilha
         linhasDaPlanilha.push(["Data", "Dia da Semana", "Status", "Funcionário"]);
 
-        // Itera sobre cada dia do mês gerado
         dados.dias.forEach(dia => {
             const dataFormatada = dia.data.toLocaleDateString('pt-BR');
             const nomeDiaSemana = diasDaSemanaNomes[dia.diaSemana];
 
-            // Adiciona linhas para quem folgou
             dia.folgas.forEach(funcionario => {
                 linhasDaPlanilha.push([dataFormatada, nomeDiaSemana, "Folga", funcionario]);
             });
-
-            // Adiciona linhas para quem trabalhou
             dia.trabalham.forEach(funcionario => {
                 linhasDaPlanilha.push([dataFormatada, nomeDiaSemana, "Trabalho", funcionario]);
             });
-
-            // Adiciona linhas para os freelancers
             dia.freelancers.forEach(f => {
                 linhasDaPlanilha.push([dataFormatada, nomeDiaSemana, `Freelancer: ${f.status}`, f.nome]);
             });
         });
 
-        // Cria a planilha usando a biblioteca SheetJS
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.aoa_to_sheet(linhasDaPlanilha);
-
-        // Define a largura das colunas para melhor visualização
         worksheet["!cols"] = [ { wch: 12 }, { wch: 15 }, { wch: 20 }, { wch: 25 } ];
-
         XLSX.utils.book_append_sheet(workbook, worksheet, "Escala Mensal");
-
-        // Gera o arquivo e inicia o download
         const nomeArquivo = `Escala_${dados.nomeMes}_${dados.ano}.xlsx`;
         XLSX.writeFile(workbook, nomeArquivo);
     }
     
-    // --- FUNÇÃO DE RENDERIZAÇÃO (VISUAL) ---
     function renderizarCalendario(dados) {
         let html = `
             <div class="text-center"><h2>Escala de ${dados.nomeMes.charAt(0).toUpperCase() + dados.nomeMes.slice(1)} de ${dados.ano}</h2></div>
-            <div class="calendario-grid mt-3">
+            <div class.calendario-grid mt-3">
                 <div class="header-dia">Dom</div><div class="header-dia">Seg</div><div class="header-dia">Ter</div><div class="header-dia">Qua</div><div class="header-dia">Qui</div><div class="header-dia">Sex</div><div class="header-dia">Sáb</div>`;
 
         const diasNoMesAnterior = new Date(dados.ano, dados.mes - 1, 0).getDate();
@@ -206,7 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `<div class="dia-celula"><div class="dia-numero">${dia.dia}</div>`;
             if (dia.folgas.length > 0) {
                 html += `<ul class="lista-folgas"><strong>Folgas:</strong>`;
-                dia.folgas.forEach(pessoa => { html += `<li class="folga-sexta">${pessoa}</li>`; });
+                dia.folgas.forEach(pessoa => { 
+                    let tipoFolga = '';
+                    if (dia.diaSemana === 5) tipoFolga = 'sexta';
+                    else if (dia.diaSemana === 6) tipoFolga = 'sabado';
+                    else if (dia.diaSemana === 0) tipoFolga = 'domingo';
+                    html += `<li class="folga-item folga-${tipoFolga}">${pessoa}</li>`; 
+                });
                 html += `</ul>`;
             }
             if (dia.trabalham.length > 0) {
