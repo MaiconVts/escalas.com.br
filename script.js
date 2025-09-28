@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ESTADO INICIAL E PERSISTÊNCIA ---
     const ESTADO_BASE_SETEMBRO = { ordemDosGrupos: ['grupoA', 'grupoB', 'grupoC'] };
     let estadoAtual = carregarEstado();
-    // Variável para guardar os dados da última escala gerada
     let dadosDaEscalaAtual = null;
 
     // --- MAPEAMENTO DE ELEMENTOS DO DOM ---
@@ -108,9 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const estadoFinal = calcularRotacaoPrincipal(dias, estadoInicialDoMes, nomesDosGrupos, todosFuncionarios);
 
-        // --- LÓGICA DOS FREELANCERS CORRIGIDA ---
         if (freelancer1 || freelancer2) {
-            let trabalhaHoje = false; 
+            // CORREÇÃO: Inicia o ciclo com "Trabalha" para o primeiro dia útil.
+            let trabalhaHoje = true; 
             dias.forEach(diaInfo => {
                 const status = (diaInfo.diaSemana === 0) ? 'Folga' : (trabalhaHoje ? 'Trabalha' : 'Folga');
                 
@@ -120,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 trabalhaHoje = !trabalhaHoje;
             });
         }
-        // --- FIM DA LÓGICA ---
 
         const nomeMes = new Date(ano, mesJS, 1).toLocaleString('pt-BR', { month: 'long' });
 
@@ -177,9 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderizarCalendario(dados) {
+        // CORREÇÃO: O erro de digitação class.calendario-grid foi trocado por class="calendario-grid"
         let html = `
             <div class="text-center"><h2>Escala de ${dados.nomeMes.charAt(0).toUpperCase() + dados.nomeMes.slice(1)} de ${dados.ano}</h2></div>
-            <div class.calendario-grid mt-3">
+            <div class="calendario-grid mt-3">
                 <div class="header-dia">Dom</div><div class="header-dia">Seg</div><div class="header-dia">Ter</div><div class="header-dia">Qua</div><div class="header-dia">Qui</div><div class="header-dia">Sex</div><div class="header-dia">Sáb</div>`;
 
         const diasNoMesAnterior = new Date(dados.ano, dados.mes - 1, 0).getDate();
@@ -196,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (dia.diaSemana === 5) tipoFolga = 'sexta';
                     else if (dia.diaSemana === 6) tipoFolga = 'sabado';
                     else if (dia.diaSemana === 0) tipoFolga = 'domingo';
-                    html += `<li class="folga-item folga-${tipoFolga}">${pessoa}</li>`; 
+                    html += `<li class="folga-item ${tipoFolga}">${pessoa}</li>`; 
                 });
                 html += `</ul>`;
             }

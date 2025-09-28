@@ -1,6 +1,6 @@
 /* --- GERAL --- */
 body {
-    background-color: #f4f7f6; /* Um cinza mais suave */
+    background-color: #f4f7f6;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -13,14 +13,14 @@ body {
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0; /* Removemos o gap para um visual de tabela */
-    border: 1px solid #dee2e6; /* Borda externa */
+    gap: 0;
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    overflow: hidden; /* Garante que as bordas arredondadas funcionem */
+    overflow: hidden;
 }
 
 .header-dia {
-    font-weight: 600; /* Um pouco mais forte */
+    font-weight: 600;
     text-align: center;
     padding: 12px 5px;
     background-color: #f8f9fa;
@@ -30,7 +30,7 @@ body {
 
 .dia-celula {
     background-color: #fff;
-    min-height: 150px; /* Células mais altas para mais conteúdo */
+    min-height: 150px;
     padding: 8px;
     display: flex;
     flex-direction: column;
@@ -39,7 +39,6 @@ body {
     border-top: 1px solid #e9ecef;
 }
 
-/* Remove a borda direita da última coluna (Sábado) */
 .dia-celula:nth-of-type(7n) {
     border-right: none;
 }
@@ -47,7 +46,7 @@ body {
 .dia-numero {
     font-weight: 600;
     font-size: 1.1em;
-    margin-bottom: 8px; /* Mais espaço abaixo do número */
+    margin-bottom: 8px;
     color: #333;
 }
 
@@ -64,7 +63,7 @@ body {
     list-style-type: none;
     padding-left: 0;
     margin-top: 5px;
-    font-size: 0.85em; /* Ajuste fino no tamanho da fonte */
+    font-size: 0.85em;
 }
 
 .lista-folgas li, .lista-trabalham li {
@@ -83,10 +82,18 @@ body {
     display: block;
 }
 
-/* --- CORES E ESTILOS DOS ITENS --- */
-.folga-item {
+/* --- CORES E ESTILOS DOS ITENS (CORRIGIDO) --- */
+.folga-item.sexta {
     color: #0f5132;
     background-color: #d1e7dd;
+}
+.folga-item.sabado {
+    color: #055160;
+    background-color: #cff4fc;
+}
+.folga-item.domingo {
+    color: #664d03;
+    background-color: #fff3cd;
 }
 
 .trabalha-item {
