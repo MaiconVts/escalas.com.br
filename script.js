@@ -35,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const nomesDosGrupos = getGruposFromUI();
 
         const dadosEscala = gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoAtual, nomesDosGrupos);
-        
+
         estadoAtual = dadosEscala.estadoFinal;
         dadosDaEscalaAtual = dadosEscala;
         salvarEstado(estadoAtual);
         atualizarLabelsUI(estadoAtual);
         renderizarCalendario(dadosEscala);
-        
+
         exportExcelBtn.disabled = false;
     });
 
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             grupoC: inputsGrupoC.map(input => input.value.trim()).filter(Boolean)
         };
     }
-    
+
     function gerarDadosDaEscala(ano, mes, freelancer1, freelancer2, estadoInicialDoMes, nomesDosGrupos) {
         const mesJS = mes - 1;
         const diasNoMes = new Date(ano, mes, 0).getDate();
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 1; i <= diasNoMes; i++) {
             dias.push({ data: new Date(ano, mesJS, i), dia: i, diaSemana: new Date(ano, mesJS, i).getDay(), folgas: [], trabalham: [], freelancers: [] });
         }
-        
+
         const estadoFinal = calcularRotacaoPrincipal(dias, estadoInicialDoMes, nomesDosGrupos, todosFuncionarios);
 
         // --- LÓGICA DOS FREELANCERS CORRIGIDA ---
@@ -113,12 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (freelancer1 || freelancer2) {
             let trabalhaHoje = false; // Começam o ciclo do mês com folga no primeiro dia útil.
             dias.forEach(diaInfo => {
+                // O mesmo status é calculado para ambos
                 const status = (diaInfo.diaSemana === 0) ? 'Folga' : (trabalhaHoje ? 'Trabalha' : 'Folga');
-                
+
+                // E aplicado individualmente a cada um, se existirem
                 if (freelancer1) diaInfo.freelancers.push({ nome: freelancer1, status });
                 if (freelancer2) diaInfo.freelancers.push({ nome: freelancer2, status });
 
-                // O ciclo dia-sim/dia-não avança para o próximo dia.
+                // O ciclo dia-sim/dia-não avança para o próximo dia para AMBOS ao mesmo tempo
                 trabalhaHoje = !trabalhaHoje;
             });
         }
@@ -172,12 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.aoa_to_sheet(linhasDaPlanilha);
-        worksheet["!cols"] = [ { wch: 12 }, { wch: 15 }, { wch: 20 }, { wch: 25 } ];
+        worksheet["!cols"] = [{ wch: 12 }, { wch: 15 }, { wch: 20 }, { wch: 25 }];
         XLSX.utils.book_append_sheet(workbook, worksheet, "Escala Mensal");
         const nomeArquivo = `Escala_${dados.nomeMes}_${dados.ano}.xlsx`;
         XLSX.writeFile(workbook, nomeArquivo);
     }
-    
+
     function renderizarCalendario(dados) {
         let html = `
             <div class="text-center"><h2>Escala de ${dados.nomeMes.charAt(0).toUpperCase() + dados.nomeMes.slice(1)} de ${dados.ano}</h2></div>
@@ -193,13 +195,13 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `<div class="dia-celula"><div class="dia-numero">${dia.dia}</div>`;
             if (dia.folgas.length > 0) {
                 html += `<ul class="lista-folgas"><strong>Folgas:</strong>`;
-                dia.folgas.forEach(pessoa => { 
+                dia.folgas.forEach(pessoa => {
                     // Pequeno ajuste para aplicar a cor correta da folga do dia
                     let tipoFolga = '';
                     if (dia.diaSemana === 5) tipoFolga = 'sexta';
                     else if (dia.diaSemana === 6) tipoFolga = 'sabado';
                     else if (dia.diaSemana === 0) tipoFolga = 'domingo';
-                    html += `<li class="folga-${tipoFolga}">${pessoa}</li>`; 
+                    html += `<li class="folga-${tipoFolga}">${pessoa}</li>`;
                 });
                 html += `</ul>`;
             }
@@ -209,16 +211,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += `</ul>`;
             }
             if (dia.freelancers.length > 0) {
-                 html += `<ul class="lista-trabalham"><strong>Freelancers:</strong>`;
-                 dia.freelancers.forEach(f => {
-                     const classe = f.status === 'Trabalha' ? 'freelancer-trabalha' : 'freelancer-folga';
-                     html += `<li class="freelancer-item ${classe}">${f.nome}: ${f.status}</li>`;
-                 });
-                 html += `</ul>`;
+                html += `<ul class="lista-trabalham"><strong>Freelancers:</strong>`;
+                dia.freelancers.forEach(f => {
+                    const classe = f.status === 'Trabalha' ? 'freelancer-trabalha' : 'freelancer-folga';
+                    html += `<li class="freelancer-item ${classe}">${f.nome}: ${f.status}</li>`;
+                });
+                html += `</ul>`;
             }
             html += `</div>`;
         });
-        
+
         const totalCelulas = dados.primeiroDiaSemana + dados.dias.length;
         const celulasFaltantes = (totalCelulas % 7 === 0) ? 0 : 7 - (totalCelulas % 7);
         for (let i = 1; i <= celulasFaltantes; i++) {
