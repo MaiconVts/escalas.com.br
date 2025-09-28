@@ -108,14 +108,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const estadoFinal = calcularRotacaoPrincipal(dias, estadoInicialDoMes, nomesDosGrupos, todosFuncionarios);
 
         if (freelancer1 || freelancer2) {
-            // CORREÇÃO: Inicia o ciclo com "Trabalha" para o primeiro dia útil.
-            let trabalhaHoje = true; 
+            // CORREÇÃO: Lógica invertida para começar com folga no primeiro dia útil.
+            let trabalhaHoje = false; 
             dias.forEach(diaInfo => {
                 const status = (diaInfo.diaSemana === 0) ? 'Folga' : (trabalhaHoje ? 'Trabalha' : 'Folga');
                 
                 if (freelancer1) diaInfo.freelancers.push({ nome: freelancer1, status });
                 if (freelancer2) diaInfo.freelancers.push({ nome: freelancer2, status });
 
+                // A inversão correta acontece aqui.
                 trabalhaHoje = !trabalhaHoje;
             });
         }
@@ -175,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function renderizarCalendario(dados) {
-        // CORREÇÃO: O erro de digitação class.calendario-grid foi trocado por class="calendario-grid"
+        // CORREÇÃO FINAL: O erro de digitação foi corrigido de class. para class=
         let html = `
             <div class="text-center"><h2>Escala de ${dados.nomeMes.charAt(0).toUpperCase() + dados.nomeMes.slice(1)} de ${dados.ano}</h2></div>
             <div class="calendario-grid mt-3">

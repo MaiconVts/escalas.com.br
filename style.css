@@ -9,7 +9,7 @@ body {
     color: #343a40;
 }
 
-/* --- CALENDÁRIO: A NOVA ESTRUTURA --- */
+/* --- CALENDÁRIO: ESTRUTURA --- */
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -82,7 +82,7 @@ body {
     display: block;
 }
 
-/* --- CORES E ESTILOS DOS ITENS (CORRIGIDO) --- */
+/* --- CORES E ESTILOS DOS ITENS --- */
 .folga-item.sexta {
     color: #0f5132;
     background-color: #d1e7dd;
